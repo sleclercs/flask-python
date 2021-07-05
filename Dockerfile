@@ -1,17 +1,22 @@
-FROM ubuntu:20.04
+# Using official python runtime base image
+FROM python:3
 
-RUN apt-get update -y && \
-    apt-get install -y python3-pip python-dev
+WORKDIR /usr/src/app
 
-# We copy just the requirements.txt first to leverage Docker cache
-COPY ./requirements.txt /app/requirements.txt
+# Install our requirements.txt
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-WORKDIR /app
+# Copy our code from the current folder to /app inside the container
+ADD . ./
 
-RUN pip install -r requirements.txt
+# Make port 5000 available for links and/or publish
+EXPOSE 5000
 
-COPY . /app
+# Define our command to be run when launching the container
+#CMD ["gunicorn", "app:app", "-b", "0.0.0.0:5000", "--log-file", "-", "--access-logfile", "-", "--workers", "4", "--keep-alive", "0"]
+CMD ["python", "./app.py"]
 
-ENTRYPOINT [ "python" ]
 
-CMD [ "app.py" ]
+
+
